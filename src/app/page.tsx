@@ -228,14 +228,10 @@ export default function Home() {
             let totalSub = 0;
             let recentSub = 0;
 
-            console.log(`found ${data.result.length} submissions by ${user.handle}`);
-
             for (const sub of data.result) {
                 if (sub.verdict === Verdict.OK) {
                     totalSub++;
                     if (sub.creationTimeSeconds > aWeekAgo) recentSub++;
-                } else if (user.handle === "kristoferfannar") {
-                    console.log("verdict: ", sub.verdict);
                 }
             }
 
@@ -264,8 +260,6 @@ export default function Home() {
                 };
             });
 
-            console.log(`got ${fetched.length} users`);
-
             fetched.sort((a, b) => {
                 return a.rating >= b.rating ? -1 : 1;
             });
@@ -281,9 +275,6 @@ export default function Home() {
                 const { totalSubmissions, recentSubmissions } =
                     await fetchSubmissions(user);
 
-                console.log(
-                    `${user.handle}: rating ${oldRating} -> ${user.rating}, submissions: ${totalSubmissions} (+ ${recentSubmissions})`,
-                );
                 setUsers((prevUsers) =>
                     prevUsers.map((u) => {
                         return u.handle === user.handle
