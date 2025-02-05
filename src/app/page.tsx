@@ -1,15 +1,35 @@
 "use client";
-import type { RatingChangeDTO, User, UserDTO } from "@/utils/types";
+import {
+    Verdict,
+    type RatingChangeDTO,
+    type SubmissionDTO,
+    type User,
+    type UserDTO,
+} from "@/utils/types";
 import { useEffect, useState } from "react";
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const renderHeader = () => {
+const renderRankingHeader = () => {
     return (
         <div className="flex flex-row justify-between">
             <div className="flex flex-row justify-between flex-grow w-1/2">
                 <p className="italic">handle</p>
                 <p className="italic">rating</p>
+            </div>
+            <div className="flex justify-end w-1/2">
+                <p className="italic">change</p>
+            </div>
+        </div>
+    );
+};
+
+const renderSubmissionHeader = () => {
+    return (
+        <div className="flex flex-row justify-between">
+            <div className="flex flex-row justify-between flex-grow w-1/2">
+                <p className="italic">handle</p>
+                <p className="italic">submissions</p>
             </div>
             <div className="flex justify-end w-1/2">
                 <p className="italic">change</p>
@@ -30,7 +50,17 @@ const renderRatingChange = (ratingChange: number) => {
     return <p>-</p>;
 };
 
-const renderName = (user: User) => {
+const renderRecentSubmissions = (recentSubmissions: number) => {
+    if (recentSubmissions > 0) {
+        return (
+            <p className="text-green-500 font-bold">{`+ ${recentSubmissions}`}</p>
+        );
+    }
+
+    return <p>0</p>;
+};
+
+const renderRanking = (user: User) => {
     let ratingStyle = "";
     if (user.rating >= 3000) ratingStyle = "legendary-grandmaster";
     else if (user.rating >= 2600) ratingStyle = "international-grandmaster";
@@ -51,7 +81,9 @@ const renderName = (user: User) => {
     return (
         <div className="flex flex-row justify-between">
             <div className="flex flex-row justify-between flex-grow w-1/2">
-                <p className={style}>{user.handle}</p>
+                <a href={`https://codeforces.com/profile/${user.handle}`}>
+                    <p className={style}>{user.handle}</p>
+                </a>
                 <p>{user.rating ?? 0}</p>
             </div>
             <div className="flex justify-end w-1/2">
@@ -59,6 +91,43 @@ const renderName = (user: User) => {
                     <p>loading</p>
                 ) : (
                     renderRatingChange(user.ratingChange)
+                )}
+            </div>
+        </div>
+    );
+};
+
+const renderSubmission = (user: User) => {
+    let ratingStyle = "";
+    if (user.rating >= 3000) ratingStyle = "legendary-grandmaster";
+    else if (user.rating >= 2600) ratingStyle = "international-grandmaster";
+    else if (user.rating >= 2400) ratingStyle = "grandmaster";
+    else if (user.rating >= 2300) ratingStyle = "international-master";
+    else if (user.rating >= 2100) ratingStyle = "master";
+    else if (user.rating >= 1900) ratingStyle = "candidate-master";
+    else if (user.rating >= 1600) ratingStyle = "expert";
+    else if (user.rating >= 1400) ratingStyle = "specialist";
+    else if (user.rating >= 1200) ratingStyle = "pupil";
+    else if (user.rating > 0) ratingStyle = "newbie";
+
+    let style = "";
+    if (ratingStyle) {
+        style += `font-bold text-${ratingStyle}`;
+    }
+
+    return (
+        <div className="flex flex-row justify-between">
+            <div className="flex flex-row justify-between flex-grow w-1/2">
+                <a href={`https://codeforces.com/profile/${user.handle}`}>
+                    <p className={style}>{user.handle}</p>
+                </a>
+                <p>{user.totalSubmissions}</p>
+            </div>
+            <div className="flex justify-end w-1/2">
+                {user.ratingChange === undefined ? (
+                    <p>loading</p>
+                ) : (
+                    renderRecentSubmissions(user.recentSubmissions ?? 0)
                 )}
             </div>
         </div>
@@ -94,7 +163,13 @@ export default function Home() {
         "ruby931109",
         "jeffreyhuang1009",
         "ZakT",
+        "kingsley.u",
+        "Dani22reich",
+        "laraj723",
+        "zacharyzusin",
+        "ppusarla",
     ];
+
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -103,7 +178,8 @@ export default function Home() {
         getInfo(names);
     }, []);
 
-    const fetchRatingChange = async (user: User) => {
+    const fetchOldRating = async (user: User) => {
+        let oldRating = user.rating;
         try {
             const response = await fetch(
                 `https://codeforces.com/api/user.rating?handle=${user.handle}`,
@@ -117,7 +193,7 @@ export default function Home() {
             }
 
             const aWeekAgo = Math.floor(Date.now() / 1000 - 7 * 24 * 60 * 60);
-            let oldRating = user.rating;
+
             for (
                 let i = data.result.length - 1;
                 i >= 0 && data.result[i].ratingUpdateTimeSeconds >= aWeekAgo;
@@ -126,19 +202,46 @@ export default function Home() {
                 oldRating = data.result[i].oldRating;
             }
 
-            setUsers((prevUsers) =>
-                prevUsers
-                    .map((u) => {
-                        return u.handle === user.handle
-                            ? { ...u, ratingChange: user.rating - oldRating }
-                            : u;
-                    })
-                    .sort((a, b) => (a.ratingChange! > b.ratingChange! ? -1 : 1)),
-            );
+            return oldRating;
         } catch (error) {
-            setError("error");
-        } finally {
-            setLoading(false);
+            return oldRating;
+        }
+    };
+
+    const fetchSubmissions = async (
+        user: User,
+    ): Promise<{ totalSubmissions: number; recentSubmissions: number }> => {
+        try {
+            const response = await fetch(
+                `https://codeforces.com/api/user.status?handle=${user.handle}`,
+            );
+
+            const data: { status: string; result: SubmissionDTO[] } =
+                await response.json();
+
+            if (!response.ok || data.status !== "OK") {
+                throw new Error("failed");
+            }
+
+            const aWeekAgo = Math.floor(Date.now() / 1000 - 7 * 24 * 60 * 60);
+
+            let totalSub = 0;
+            let recentSub = 0;
+
+            console.log(`found ${data.result.length} submissions by ${user.handle}`);
+
+            for (const sub of data.result) {
+                if (sub.verdict === Verdict.OK) {
+                    totalSub++;
+                    if (sub.creationTimeSeconds > aWeekAgo) recentSub++;
+                } else if (user.handle === "kristoferfannar") {
+                    console.log("verdict: ", sub.verdict);
+                }
+            }
+
+            return { totalSubmissions: totalSub, recentSubmissions: recentSub };
+        } catch (error) {
+            return { totalSubmissions: -1, recentSubmissions: -1 };
         }
     };
 
@@ -169,25 +272,50 @@ export default function Home() {
 
             setUsers(fetched);
 
-            for (const u of fetched) {
+            setLoading(false);
+
+            for (const user of fetched) {
                 await delay(20);
-                await fetchRatingChange(u);
+                const oldRating = await fetchOldRating(user);
+                await delay(20);
+                const { totalSubmissions, recentSubmissions } =
+                    await fetchSubmissions(user);
+
+                console.log(
+                    `${user.handle}: rating ${oldRating} -> ${user.rating}, submissions: ${totalSubmissions} (+ ${recentSubmissions})`,
+                );
+                setUsers((prevUsers) =>
+                    prevUsers.map((u) => {
+                        return u.handle === user.handle
+                            ? {
+                                ...u,
+                                ratingChange: user.rating - oldRating,
+                                totalSubmissions: totalSubmissions,
+                                recentSubmissions: recentSubmissions,
+                            }
+                            : u;
+                    }),
+                );
             }
         } catch (error) {
             setError("error");
-        } finally {
-            setLoading(false);
         }
     };
 
-    useEffect(() => {
-        console.log(`there are ${users.length} users`);
-    }, [users]);
+    const renderRankings = () => {
+        return users
+            .sort((a, b) => (a.ratingChange! > b.ratingChange! ? -1 : 1))
+            .map((user) => {
+                return <div key={user.handle}>{renderRanking(user)}</div>;
+            });
+    };
 
-    const renderNames = () => {
-        return users.map((user) => {
-            return <div key={user.handle}>{renderName(user)}</div>;
-        });
+    const renderSubmissions = () => {
+        return users
+            .sort((a, b) => (a.recentSubmissions! > b.recentSubmissions! ? -1 : 1))
+            .map((user) => {
+                return <div key={user.handle}>{renderSubmission(user)}</div>;
+            });
     };
 
     return (
@@ -197,10 +325,16 @@ export default function Home() {
             ) : error ? (
                 <p>error</p>
             ) : (
-                <div className="flex items-center flex-col">
+                <div className="flex justify-center gap-32">
                     <div className="w-full max-w-96">
-                        {renderHeader()}
-                        {renderNames()}
+                        <h2 className="font-bold text-center text-2xl">Ranking</h2>
+                        {renderRankingHeader()}
+                        {renderRankings()}
+                    </div>
+                    <div className="w-full max-w-96">
+                        <h2 className="font-bold text-center text-2xl">Submissions</h2>
+                        {renderSubmissionHeader()}
+                        {renderSubmissions()}
                     </div>
                 </div>
             )}
