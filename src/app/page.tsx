@@ -1,101 +1,193 @@
-import Image from "next/image";
+"use client";
+import type { RatingChangeDTO, User, UserDTO } from "@/utils/types";
+import { useEffect, useState } from "react";
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const renderHeader = () => {
+    return (
+        <div className="flex flex-row justify-between">
+            <div className="flex flex-row justify-between flex-grow w-1/2">
+                <p className="italic">handle</p>
+                <p className="italic">rating</p>
+            </div>
+            <div className="flex justify-end w-1/2">
+                <p className="italic">change</p>
+            </div>
+        </div>
+    );
+};
+
+const renderRatingChange = (ratingChange: number) => {
+    if (ratingChange > 0) {
+        return <p className="text-green-500 font-bold">{`+ ${ratingChange}`}</p>;
+    }
+    if (ratingChange < 0) {
+        return (
+            <p className="text-red-500 font-bold">{`- ${Math.abs(ratingChange)}`}</p>
+        );
+    }
+    return <p>-</p>;
+};
+
+const renderName = (user: User) => {
+    let ratingStyle = "";
+    if (user.rating >= 3000) ratingStyle = "legendary-grandmaster";
+    else if (user.rating >= 2600) ratingStyle = "international-grandmaster";
+    else if (user.rating >= 2400) ratingStyle = "grandmaster";
+    else if (user.rating >= 2300) ratingStyle = "international-master";
+    else if (user.rating >= 2100) ratingStyle = "master";
+    else if (user.rating >= 1900) ratingStyle = "candidate-master";
+    else if (user.rating >= 1600) ratingStyle = "expert";
+    else if (user.rating >= 1400) ratingStyle = "specialist";
+    else if (user.rating >= 1200) ratingStyle = "pupil";
+    else if (user.rating > 0) ratingStyle = "newbie";
+
+    let style = "";
+    if (ratingStyle) {
+        style += `font-bold text-${ratingStyle}`;
+    }
+
+    return (
+        <div className="flex flex-row justify-between">
+            <div className="flex flex-row justify-between flex-grow w-1/2">
+                <p className={style}>{user.handle}</p>
+                <p>{user.rating ?? 0}</p>
+            </div>
+            <div className="flex justify-end w-1/2">
+                {user.ratingChange === undefined ? (
+                    <p>loading</p>
+                ) : (
+                    renderRatingChange(user.ratingChange)
+                )}
+            </div>
+        </div>
+    );
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    const names = [
+        "kristoferfannar",
+        "lsig",
+        "ikaurov",
+        "josh2775",
+        "guhasada",
+        "porkbarrel",
+        "BenjaR",
+        "billionaire",
+        "ArieArya",
+        "kalcy",
+        "Kryogenesis",
+    ];
+    const [users, setUsers] = useState<User[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    useEffect(() => {
+        getInfo(names);
+    }, []);
+
+    const fetchRatingChange = async (user: User) => {
+        try {
+            const response = await fetch(
+                `https://codeforces.com/api/user.rating?handle=${user.handle}`,
+            );
+
+            const data: { status: string; result: RatingChangeDTO[] } =
+                await response.json();
+
+            if (!response.ok || data.status !== "OK") {
+                throw new Error("failed");
+            }
+
+            const aWeekAgo = Math.floor(Date.now() / 1000 - 7 * 24 * 60 * 60);
+            let oldRating = user.rating;
+            for (
+                let i = data.result.length - 1;
+                i >= 0 && data.result[i].ratingUpdateTimeSeconds >= aWeekAgo;
+                i--
+            ) {
+                oldRating = data.result[i].oldRating;
+            }
+
+            setUsers((prevUsers) =>
+                prevUsers
+                    .map((u) => {
+                        return u.handle === user.handle
+                            ? { ...u, ratingChange: user.rating - oldRating }
+                            : u;
+                    })
+                    .sort((a, b) => (a.ratingChange! > b.ratingChange! ? -1 : 1)),
+            );
+        } catch (error) {
+            setError("error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getInfo = async (handles: string[]) => {
+        try {
+            const response = await fetch(
+                `https://codeforces.com/api/user.info?handles=${handles.join(";")}`,
+            );
+
+            const data: { status: string; result: UserDTO[] } = await response.json();
+            if (!response.ok || data.status !== "OK") {
+                throw new Error("failed");
+            }
+
+            const fetched = data.result.map((out): User => {
+                return {
+                    handle: out.handle,
+                    rating: out.rating ?? 0,
+                    maxRating: out.maxRating ?? 0,
+                };
+            });
+
+            console.log(`got ${fetched.length} users`);
+
+            fetched.sort((a, b) => {
+                return a.rating >= b.rating ? -1 : 1;
+            });
+
+            setUsers(fetched);
+
+            for (const u of fetched) {
+                await delay(20);
+                await fetchRatingChange(u);
+            }
+        } catch (error) {
+            setError("error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        console.log(`there are ${users.length} users`);
+    }, [users]);
+
+    const renderNames = () => {
+        return users.map((user) => {
+            return <div key={user.handle}>{renderName(user)}</div>;
+        });
+    };
+
+    return (
+        <div className="m-8 border-black ">
+            {loading ? (
+                <p>loading</p>
+            ) : error ? (
+                <p>error</p>
+            ) : (
+                <div className="flex items-center flex-col">
+                    <div className="w-full max-w-96">
+                        {renderHeader()}
+                        {renderNames()}
+                    </div>
+                </div>
+            )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+    );
 }

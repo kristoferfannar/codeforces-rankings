@@ -1,18 +1,50 @@
 import type { Config } from "tailwindcss";
 
 export default {
-  content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  theme: {
-    extend: {
-      colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-      },
-    },
-  },
-  plugins: [],
+	content: [
+		"./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+		"./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+		"./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+	],
+	theme: {
+		extend: {
+			colors: {
+				background: "var(--background)",
+				foreground: "var(--foreground)",
+				// "legendary-grandmaster": "#AA0100",
+				"legendary-grandmaster": "#FF0000",
+				// "international-grandmaster": "#FF3333",
+				"international-grandmaster": "#FF0000",
+				// grandmaster: "#FF7777",
+				grandmaster: "#FF0000",
+				// "international-master": "#FFBB55",
+				"international-master": "#FFC100",
+				// master: "#FFCC87",
+				master: "#FFC100",
+				// "candidate-master": "#FF88FF",
+				"candidate-master": "#934BC9",
+				// expert: "#AAAAFF",
+				expert: "#3F04FC",
+				// specialist: "#76DDBB",
+				specialist: "#66FFCC",
+				// pupil: "#76FF77",
+				pupil: "#00B050",
+				// newbie: "#CCCCCC",
+				newbie: "#A6A6A6",
+			},
+		},
+	},
+	safelist: [
+		"text-legendary-grandmaster",
+		"text-international-grandmaster",
+		"text-grandmaster",
+		"text-international-master",
+		"text-master",
+		"text-candidate-master",
+		"text-expert",
+		"text-specialist",
+		"text-pupil",
+		"text-newbie",
+	],
+	plugins: [],
 } satisfies Config;
