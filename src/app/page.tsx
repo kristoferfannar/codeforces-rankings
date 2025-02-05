@@ -73,8 +73,6 @@ export default function Home() {
         "josh2775",
         "guhasada",
         "porkbarrel",
-        "BenjaR",
-        "billionaire",
         "ArieArya",
         "kalcy",
         "Kryogenesis",
