@@ -1,24 +1,30 @@
 {
-  "name": "codeforces-viewer",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next": "15.1.6"
-  },
-  "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1"
-  }
+	"name": "codeforces-viewer",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "concurrently npm:dev:*",
+		"dev:next": "next dev --turbopack",
+		"dev:cron": "vercel-cron",
+		"build": "next build",
+		"start": "concurrently npm:start:*",
+		"start:cron": "vercel-cron",
+		"start:next": "next start",
+		"lint": "next lint"
+	},
+	"dependencies": {
+		"concurrently": "^9.1.2",
+		"next": "15.1.6",
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0",
+		"vercel-cron": "^1.3.0"
+	},
+	"devDependencies": {
+		"@types/node": "^20",
+		"@types/react": "^19",
+		"@types/react-dom": "^19",
+		"postcss": "^8",
+		"tailwindcss": "^3.4.1",
+		"typescript": "^5"
+	}
 }
