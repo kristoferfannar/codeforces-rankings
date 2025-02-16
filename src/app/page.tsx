@@ -26,7 +26,7 @@ export default async function Page() {
 	lastUpdated = new Date(data.lastUpdated);
 	const users = data.users;
 
-	console.log(`got ${users.length} users, lastUpdated: ${lastUpdated}`);
+	// console.log(`got ${users.length} users, lastUpdated: ${lastUpdated}`);
 
 	return (
 		<div className="m-8 border-black ">
