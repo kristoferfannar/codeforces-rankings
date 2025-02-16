@@ -4,17 +4,17 @@ let users: User[] = [];
 let lastUpdated = new Date();
 
 export const getUsers = () => {
-	return users;
+    return users;
 };
 
 export const setUsers = (u: User[]) => {
-	users = u;
+    users = u;
 };
 
 export const getLastUpdated = () => {
-	return lastUpdated;
+    return lastUpdated;
 };
 
 export const setLastUpdated = (lu: Date) => {
-	lastUpdated = lu;
+    lastUpdated = lu;
 };
