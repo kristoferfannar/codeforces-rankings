@@ -1,4 +1,3 @@
-import { setLastUpdated, setUsers } from "@/app/data";
 import {
 	Verdict,
 	type RatingChangeDTO,
@@ -6,6 +5,8 @@ import {
 	type User,
 	type UserDTO,
 } from "@/utils/types";
+
+export const maxDuration = 60; // this endpoint can run for up to 60 seconds (max for hobby)
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
