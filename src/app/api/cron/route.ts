@@ -220,5 +220,5 @@ export async function GET(request: Request) {
 	console.log(`out: ${out}`);
 	// setUsers(users);
 	// setLastUpdated(new Date());
-	return Response.json({ success: true });
+	return Response.json({ success: res.ok });
 }
