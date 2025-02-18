@@ -99,9 +99,9 @@ const getInfo = async (handles: string[]): Promise<User[]> => {
 
 	for (const user of fetched) {
 		console.log(`processing "${user.handle}"`);
-		await delay(20);
+		await delay(30);
 		const oldRating = await fetchOldRating(user);
-		await delay(20);
+		await delay(30);
 		const { totalSubmissions, recentSubmissions } =
 			await fetchSubmissions(user);
 
@@ -218,7 +218,5 @@ export async function GET(request: Request) {
 	const out = await res.text();
 
 	console.log(`out: ${out}`);
-	// setUsers(users);
-	// setLastUpdated(new Date());
 	return Response.json({ success: res.ok });
 }
