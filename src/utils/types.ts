@@ -13,6 +13,14 @@ export type User = {
 	recentSubmissions?: number;
 };
 
+export type UserEdge = {
+	handle: string;
+	rating: number;
+	ratingChange?: number;
+	totalSubmissions?: number;
+	recentSubmissions?: number;
+};
+
 export type RatingChangeDTO = {
 	ratingUpdateTimeSeconds: number;
 	oldRating: number;

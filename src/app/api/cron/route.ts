@@ -1,4 +1,5 @@
 import {
+	UserEdge,
 	Verdict,
 	type RatingChangeDTO,
 	type SubmissionDTO,
@@ -73,7 +74,7 @@ const fetchSubmissions = async (
 	}
 };
 
-const getInfo = async (handles: string[]): Promise<User[]> => {
+const getInfo = async (handles: string[]): Promise<UserEdge[]> => {
 	const response = await fetch(
 		`https://codeforces.com/api/user.info?handles=${handles.join(";")}`,
 	);
@@ -95,7 +96,7 @@ const getInfo = async (handles: string[]): Promise<User[]> => {
 		return a.rating >= b.rating ? -1 : 1;
 	});
 
-	const users: User[] = [];
+	const users: UserEdge[] = [];
 
 	for (const user of fetched) {
 		console.log(`processing "${user.handle}"`);
@@ -109,7 +110,8 @@ const getInfo = async (handles: string[]): Promise<User[]> => {
 			console.warn(`failed to fetch submissions for "${user.handle}`);
 
 		users.push({
-			...user,
+			handle: user.handle,
+			rating: user.rating,
 			ratingChange: user.rating - oldRating,
 			totalSubmissions: totalSubmissions,
 			recentSubmissions: recentSubmissions,
