@@ -99,11 +99,14 @@ const getInfo = async (handles: string[]): Promise<User[]> => {
 
 	for (const user of fetched) {
 		console.log(`processing "${user.handle}"`);
-		await delay(30);
+		await delay(20);
 		const oldRating = await fetchOldRating(user);
-		await delay(30);
+		await delay(20);
 		const { totalSubmissions, recentSubmissions } =
 			await fetchSubmissions(user);
+
+		if (totalSubmissions === -1 || recentSubmissions === -1)
+			console.warn(`failed to fetch submissions for "${user.handle}`);
 
 		users.push({
 			...user,
