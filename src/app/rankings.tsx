@@ -93,7 +93,7 @@ const renderRankings = (users: User[]) => {
 export default function Rankings({ users }: { users: User[] }) {
 	return (
 		<div className="w-full max-w-xl">
-			<h2 className="font-bold text-center text-2xl">Ranking</h2>
+			<h2 className="font-bold text-center text-2xl">Rankings</h2>
 			{renderRankingHeader()}
 			{renderRankings(users)}
 		</div>
