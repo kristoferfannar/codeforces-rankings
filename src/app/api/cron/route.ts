@@ -1,11 +1,11 @@
-import {
+import type {
+	RatingChangeDTO,
+	SubmissionDTO,
+	User,
+	UserDTO,
 	UserEdge,
-	Verdict,
-	type RatingChangeDTO,
-	type SubmissionDTO,
-	type User,
-	type UserDTO,
 } from "@/utils/types";
+import { Verdict } from "@/utils/types";
 
 export const maxDuration = 60; // this endpoint can run for up to 60 seconds (max for hobby)
 
@@ -100,14 +100,22 @@ const getInfo = async (handles: string[]): Promise<UserEdge[]> => {
 
 	for (const user of fetched) {
 		console.log(`processing "${user.handle}"`);
-		await delay(20);
+		if (user.rating === 0) {
+			users.push({
+				handle: user.handle,
+				rating: user.rating,
+			});
+
+			continue;
+		}
+		await delay(25);
 		const oldRating = await fetchOldRating(user);
-		await delay(20);
+		await delay(25);
 		const { totalSubmissions, recentSubmissions } =
 			await fetchSubmissions(user);
 
 		if (totalSubmissions === -1 || recentSubmissions === -1)
-			console.warn(`failed to fetch submissions for "${user.handle}`);
+			console.warn(`failed to fetch submissions for "${user.handle}"`);
 
 		users.push({
 			handle: user.handle,
