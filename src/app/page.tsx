@@ -44,7 +44,7 @@ export default function Page() {
 			<div className="flex justify-evenly">
 				<p>{`updated at ${formatDate(lastUpdated)}`}</p>
 				<p>
-					Open source at{" "}
+					open source at{" "}
 					<a
 						className="italic"
 						href="https://github.com/kristoferfannar/codeforces-rankings"
