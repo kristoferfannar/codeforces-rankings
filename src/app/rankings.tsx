@@ -6,11 +6,11 @@ const renderRankingHeader = () => {
 			<div>
 				<p className="italic w-10">#</p>
 			</div>
-			<div className="flex flex-row justify-between flex-grow w-1/2">
+			<div className="flex flex-row justify-between flex-grow w-2/3">
 				<p className="italic">handle</p>
 				<p className="italic">rating</p>
 			</div>
-			<div className="flex justify-end w-1/2">
+			<div className="flex justify-end w-1/3">
 				<p className="italic">change</p>
 			</div>
 		</div>
@@ -74,7 +74,7 @@ const renderRanking = (user: User, pos: number) => {
 				</a>
 				<p>{user.rating ?? 0}</p>
 			</div>
-			<div className="flex justify-end w-1/2">
+			<div className="flex justify-end w-1/3">
 				{user.ratingChange === undefined ? (
 					<p>loading</p>
 				) : (
