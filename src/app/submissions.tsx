@@ -17,6 +17,17 @@ const renderSubmissionHeader = () => {
 	);
 };
 
+const renderSubmissionFooter = () => {
+	return (
+		<div className="flex flex-row justify-end">
+			<p className="italic">
+				* Submissions from problemsets or public competitions, not from private
+				groups
+			</p>
+		</div>
+	);
+};
+
 const renderRecentSubmissions = (recentSubmissions: number) => {
 	if (recentSubmissions > 0) {
 		return (
@@ -96,9 +107,10 @@ const renderSubmissions = (users: User[]) => {
 export default function Submissions({ users }: { users: User[] }) {
 	return (
 		<div className="w-full max-w-xl">
-			<h2 className="font-bold text-center text-2xl">Submissions</h2>
+			<h2 className="font-bold text-center text-2xl">Submissions*</h2>
 			{renderSubmissionHeader()}
 			{renderSubmissions(users)}
+			{renderSubmissionFooter()}
 		</div>
 	);
 }
