@@ -29,19 +29,25 @@ const renderRatingChange = (ratingChange: number) => {
 	return <p>-</p>;
 };
 
-const renderRanking = (user: User, pos: number) => {
+const getRankingName = (rating: number): string => {
 	let ratingStyle = "";
-	if (user.rating >= 3000) ratingStyle = "legendary-grandmaster";
-	else if (user.rating >= 2600) ratingStyle = "international-grandmaster";
-	else if (user.rating >= 2400) ratingStyle = "grandmaster";
-	else if (user.rating >= 2300) ratingStyle = "international-master";
-	else if (user.rating >= 2100) ratingStyle = "master";
-	else if (user.rating >= 1900) ratingStyle = "candidate-master";
-	else if (user.rating >= 1600) ratingStyle = "expert";
-	else if (user.rating >= 1400) ratingStyle = "specialist";
-	else if (user.rating >= 1200) ratingStyle = "pupil";
-	else if (user.rating > 0) ratingStyle = "newbie";
+	if (rating >= 3000) ratingStyle = "legendary-grandmaster";
+	else if (rating >= 2600) ratingStyle = "international-grandmaster";
+	else if (rating >= 2400) ratingStyle = "grandmaster";
+	else if (rating >= 2300) ratingStyle = "international-master";
+	else if (rating >= 2100) ratingStyle = "master";
+	else if (rating >= 1900) ratingStyle = "candidate-master";
+	else if (rating >= 1600) ratingStyle = "expert";
+	else if (rating >= 1400) ratingStyle = "specialist";
+	else if (rating >= 1200) ratingStyle = "pupil";
+	else if (rating > 0) ratingStyle = "newbie";
 
+	return ratingStyle;
+};
+
+const renderRanking = (user: User, pos: number) => {
+	const oldRatingStyle = getRankingName(user.rating - (user.ratingChange ?? 0));
+	const ratingStyle = getRankingName(user.rating);
 	let style = "";
 	if (ratingStyle) {
 		style += `font-bold text-${ratingStyle}`;
@@ -52,9 +58,19 @@ const renderRanking = (user: User, pos: number) => {
 			<div className="w-10">
 				<p>{pos}</p>
 			</div>
-			<div className="flex flex-row justify-between flex-grow w-1/2">
+			<div className="flex flex-row justify-between flex-grow w-2/3">
 				<a href={`https://codeforces.com/profile/${user.handle}`}>
-					<p className={style}>{user.handle}</p>
+					{oldRatingStyle !== ratingStyle ? (
+						<>
+							<span className={`font-bold text-${oldRatingStyle}`}>
+								{user.handle}
+							</span>
+							<span>{" -> "}</span>
+							<span className={style}>{user.handle}</span>
+						</>
+					) : (
+						<p className={style}>{user.handle}</p>
+					)}
 				</a>
 				<p>{user.rating ?? 0}</p>
 			</div>
@@ -72,7 +88,7 @@ const renderRanking = (user: User, pos: number) => {
 const renderRankings = (users: User[]) => {
 	const nw = users
 		.sort((a, b) => (a.ratingChange! > b.ratingChange! ? -1 : 1))
-		.filter((u) => u.ratingChange !== 0);
+		.filter((u) => u.ratingChange! > 0);
 
 	const ranks: number[] = [];
 	let last = nw[0].ratingChange!;
@@ -83,11 +99,13 @@ const renderRankings = (users: User[]) => {
 		ranks.push(lastRank);
 		last = nw[i].ratingChange!;
 	}
-	return nw
-		.filter((_, idx) => ranks[idx] <= 10)
-		.map((user, idx) => {
-			return <div key={user.handle}>{renderRanking(user, ranks[idx])}</div>;
-		});
+	return (
+		nw
+			// .filter((_, idx) => ranks[idx] <= 10)
+			.map((user, idx) => {
+				return <div key={user.handle}>{renderRanking(user, ranks[idx])}</div>;
+			})
+	);
 };
 
 export default function Rankings({ users }: { users: User[] }) {
