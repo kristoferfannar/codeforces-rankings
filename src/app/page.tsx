@@ -34,12 +34,25 @@ export default function Page() {
 	if (loading) return <div>loading...</div>;
 
 	return (
-		<div className="m-8 border-black ">
-			<div className="flex justify-center gap-32">
-				<Rankings users={users} />
-				<Submissions users={users} />
+		<div className="m-8 border-black flex justify-between flex-col grow">
+			<div>
+				<div className="flex justify-center gap-32">
+					<Rankings users={users} />
+					<Submissions users={users} />
+				</div>
 			</div>
-			<p>{`last updated at ${formatDate(lastUpdated)}`}</p>
+			<div className="flex justify-evenly">
+				<p>{`updated at ${formatDate(lastUpdated)}`}</p>
+				<p>
+					Open source at{" "}
+					<a
+						className="italic"
+						href="https://github.com/kristoferfannar/codeforces-rankings"
+					>
+						github.com/kristoferfannar/codeforces-rankings
+					</a>
+				</p>
+			</div>
 		</div>
 	);
 }
