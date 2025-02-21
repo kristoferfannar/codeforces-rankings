@@ -103,7 +103,10 @@ const getInfo = async (handles: string[]): Promise<UserEdge[]> => {
 		if (user.rating === 0) {
 			users.push({
 				handle: user.handle,
+				ratingChange: 0,
 				rating: user.rating,
+				totalSubmissions: 0,
+				recentSubmissions: 0,
 			});
 
 			continue;

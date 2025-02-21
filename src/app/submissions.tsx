@@ -3,6 +3,9 @@ import type { User } from "@/utils/types";
 const renderSubmissionHeader = () => {
 	return (
 		<div className="flex flex-row justify-between">
+			<div className="w-10">
+				<p className="italic">#</p>
+			</div>
 			<div className="flex flex-row justify-between flex-grow w-1/2">
 				<p className="italic">handle</p>
 				<p className="italic">submissions</p>
@@ -24,7 +27,7 @@ const renderRecentSubmissions = (recentSubmissions: number) => {
 	return <p>0</p>;
 };
 
-const renderSubmission = (user: User) => {
+const renderSubmission = (user: User, pos: number) => {
 	let ratingStyle = "";
 	if (user.rating >= 3000) ratingStyle = "legendary-grandmaster";
 	else if (user.rating >= 2600) ratingStyle = "international-grandmaster";
@@ -44,6 +47,9 @@ const renderSubmission = (user: User) => {
 
 	return (
 		<div className="flex flex-row justify-between">
+			<div className="w-10">
+				<p>{pos}</p>
+			</div>
 			<div className="flex flex-row justify-between flex-grow w-1/2">
 				<a href={`https://codeforces.com/profile/${user.handle}`}>
 					<p className={style}>{user.handle}</p>
@@ -62,16 +68,34 @@ const renderSubmission = (user: User) => {
 };
 
 const renderSubmissions = (users: User[]) => {
-	return users
-		.sort((a, b) => (a.recentSubmissions! > b.recentSubmissions! ? -1 : 1))
-		.map((user) => {
-			return <div key={user.handle}>{renderSubmission(user)}</div>;
+	const nw = users
+		.filter((u) => u.recentSubmissions !== undefined && u.recentSubmissions > 0)
+		.sort((a, b) => {
+			if (a.recentSubmissions! == b.recentSubmissions!)
+				return a.totalSubmissions! > b.totalSubmissions! ? -1 : 1;
+			return a.recentSubmissions! > b.recentSubmissions! ? -1 : 1;
+		});
+
+	const ranks: number[] = [];
+	let last = nw[0].recentSubmissions!;
+	let lastRank = 1;
+	for (let i = 0; i < nw.length; i++) {
+		if (nw[i].recentSubmissions! < last) lastRank = i + 1;
+
+		ranks.push(lastRank);
+		last = nw[i].recentSubmissions!;
+	}
+
+	return nw
+		.filter((_, idx) => ranks[idx] < 10)
+		.map((user, idx) => {
+			return <div key={user.handle}>{renderSubmission(user, ranks[idx])}</div>;
 		});
 };
 
 export default function Submissions({ users }: { users: User[] }) {
 	return (
-		<div className="w-full max-w-96">
+		<div className="w-full max-w-xl">
 			<h2 className="font-bold text-center text-2xl">Submissions</h2>
 			{renderSubmissionHeader()}
 			{renderSubmissions(users)}

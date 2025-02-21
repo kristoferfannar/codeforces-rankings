@@ -3,6 +3,9 @@ import type { User } from "@/utils/types";
 const renderRankingHeader = () => {
 	return (
 		<div className="flex flex-row justify-between">
+			<div>
+				<p className="italic w-10">#</p>
+			</div>
 			<div className="flex flex-row justify-between flex-grow w-1/2">
 				<p className="italic">handle</p>
 				<p className="italic">rating</p>
@@ -26,7 +29,7 @@ const renderRatingChange = (ratingChange: number) => {
 	return <p>-</p>;
 };
 
-const renderRanking = (user: User) => {
+const renderRanking = (user: User, pos: number) => {
 	let ratingStyle = "";
 	if (user.rating >= 3000) ratingStyle = "legendary-grandmaster";
 	else if (user.rating >= 2600) ratingStyle = "international-grandmaster";
@@ -46,6 +49,9 @@ const renderRanking = (user: User) => {
 
 	return (
 		<div className="flex flex-row justify-between">
+			<div className="w-10">
+				<p>{pos}</p>
+			</div>
 			<div className="flex flex-row justify-between flex-grow w-1/2">
 				<a href={`https://codeforces.com/profile/${user.handle}`}>
 					<p className={style}>{user.handle}</p>
@@ -64,16 +70,29 @@ const renderRanking = (user: User) => {
 };
 
 const renderRankings = (users: User[]) => {
-	return users
+	const nw = users
 		.sort((a, b) => (a.ratingChange! > b.ratingChange! ? -1 : 1))
-		.map((user) => {
-			return <div key={user.handle}>{renderRanking(user)}</div>;
+		.filter((u) => u.ratingChange !== 0);
+
+	const ranks: number[] = [];
+	let last = nw[0].ratingChange!;
+	let lastRank = 1;
+	for (let i = 0; i < nw.length; i++) {
+		if (nw[i].ratingChange! < last) lastRank = i + 1;
+
+		ranks.push(lastRank);
+		last = nw[i].ratingChange!;
+	}
+	return nw
+		.filter((_, idx) => ranks[idx] <= 10)
+		.map((user, idx) => {
+			return <div key={user.handle}>{renderRanking(user, ranks[idx])}</div>;
 		});
 };
 
 export default function Rankings({ users }: { users: User[] }) {
 	return (
-		<div className="w-full max-w-96">
+		<div className="w-full max-w-xl">
 			<h2 className="font-bold text-center text-2xl">Ranking</h2>
 			{renderRankingHeader()}
 			{renderRankings(users)}
