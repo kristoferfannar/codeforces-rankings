@@ -91,6 +91,9 @@ const renderRankings = (users: User[]) => {
 		.filter((u) => u.ratingChange! > 0);
 
 	const ranks: number[] = [];
+
+	if (nw.length === 0) return <></>;
+
 	let last = nw[0].ratingChange!;
 	let lastRank = 1;
 	for (let i = 0; i < nw.length; i++) {
