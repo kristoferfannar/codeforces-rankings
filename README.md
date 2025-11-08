@@ -36,3 +36,11 @@ EDGE_ID=<edge-database-id-here>
 The `/api/cron` endpoint queries the codeforces API for updated submissions + scores for all listed users.
 
 This endpoint is aptly named `cron` as it's hit by the Vercel cron service daily.
+
+## Environment
+
+You'll need environment variables for your website to work.
+Their setup varies slightly by how you run it:
+
+`npm run dev` -> `.env.development.local`
+`npm run start` -> `.env.local`
