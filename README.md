@@ -1,3 +1,5 @@
+# Codeforces Viewer
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -6,31 +8,31 @@ First, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Data
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The website displays info about username handles defined in `src/app/api/cron/route.ts`.
+Update that list to modify which users you track.
 
-## Learn More
+### Persistance
 
-To learn more about Next.js, take a look at the following resources:
+The Codeforces API enforces strict ratelimiting, so while we don't need to persist data, it makes the website load a lot faster.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Information about all users are persisted in a free tier Vercel Edge as its database. I think it has a maximum capacity of 8KB (yes, kilobytes).
+This means we're limited to only the most important info on each user. With more storage, I would store more stuff.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+All this to say, the current codebase requires a Vercel Edge token to persist and fetch users. You won't see any info without it.
 
-## Deploy on Vercel
+```
+EDGE_CONFIG=<edge-config-token-here>
+EDGE_ID=<edge-database-id-here>
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Updates
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The `/api/cron` endpoint queries the codeforces API for updated submissions + scores for all listed users.
+
+This endpoint is aptly named `cron` as it's hit by the Vercel cron service daily.
