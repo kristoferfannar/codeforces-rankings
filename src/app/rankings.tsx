@@ -88,7 +88,7 @@ const renderRanking = (user: User, pos: number) => {
 const renderRankings = (users: User[]) => {
 	const nw = users
 		.sort((a, b) => (a.ratingChange! > b.ratingChange! ? -1 : 1))
-		// .filter((u) => u.ratingChange! > 0);
+		.filter((u) => u.ratingChange! > 0);
 
 	const ranks: number[] = [];
 
