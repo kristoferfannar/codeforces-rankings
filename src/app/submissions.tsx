@@ -80,7 +80,7 @@ const renderSubmission = (user: User, pos: number) => {
 
 const renderSubmissions = (users: User[]) => {
 	const nw = users
-		.filter((u) => u.recentSubmissions !== undefined && u.recentSubmissions > 0)
+		.filter((u) => u.recentSubmissions !== undefined && u.recentSubmissions >= 0)
 		.sort((a, b) => {
 			if (a.recentSubmissions! == b.recentSubmissions!)
 				return a.totalSubmissions! > b.totalSubmissions! ? -1 : 1;
