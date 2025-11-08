@@ -87,6 +87,8 @@ const renderSubmissions = (users: User[]) => {
 			return a.recentSubmissions! > b.recentSubmissions! ? -1 : 1;
 		});
 
+	if (nw.length === 0) return [];
+
 	const ranks: number[] = [];
 	let last = nw[0].recentSubmissions!;
 	let lastRank = 1;
